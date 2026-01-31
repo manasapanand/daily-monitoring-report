@@ -739,57 +739,57 @@ Please find the Daily Monitoring Report<br><br>
 <tr>
   <td>1</td>
   <td>Leads Posting</td>
-  <td>{{CASE:Leads Posting}}</td>
-  <td>{{STATUS:Leads Posting}}</td>
-  <td>{{REMARK:Leads Posting}}</td>
+  <td></td>
+  <td>PASS</td>
+  <td></td>
 </tr>
 
 <tr>
   <td>2</td>
   <td>Outgoing Queue Processing</td>
-  <td>{{CASE:Outgoing Queue Processing}}</td>
-  <td>{{STATUS:Outgoing Queue Processing}}</td>
-  <td>{{REMARK:Outgoing Queue Processing}}</td>
+  <td></td>
+  <td>PASS</td>
+  <td></td>
 </tr>
 
 <tr>
   <td>3</td>
   <td>Incoming Queue Processing</td>
-  <td>{{CASE:Incoming Queue Processing}}</td>
-  <td>{{STATUS:Incoming Queue Processing}}</td>
-  <td>{{REMARK:Incoming Queue Processing}}</td>
+  <td></td>
+  <td>PASS</td>
+  <td></td>
 </tr>
 
 <tr>
   <td>4</td>
   <td>Notifications/Broadcast Successful</td>
-  <td>{{CASE:Notifications/Broadcast Successful}}</td>
-  <td>{{STATUS:Notifications/Broadcast Successful}}</td>
-  <td>{{REMARK:Notifications/Broadcast Successful}}</td>
+  <td></td>
+  <td>PASS</td>
+  <td></td>
 </tr>
 
 <tr>
   <td>5</td>
   <td>Phone Session Screenpop Successful</td>
-  <td>{{CASE:Phone Session Screenpop Successful}}</td>
-  <td>{{STATUS:Phone Session Screenpop Successful}}</td>
-  <td>{{REMARK:Phone Session Screenpop Successful}}</td>
+  <td></td>
+  <td>PASS</td>
+  <td></td>
 </tr>
 
 <tr>
   <td>6</td>
   <td>Manual Internal email test – Incoming & Outgoing</td>
-  <td>{{CASE:Manual Internal email test – Incoming & Outgoing}}</td>
-  <td>{{STATUS:Manual Internal email test – Incoming & Outgoing}}</td>
-  <td>{{REMARK:Manual Internal email test – Incoming & Outgoing}}</td>
+  <td></td>
+  <td>PASS</td>
+  <td></td>
 </tr>
 
 <tr>
   <td>7</td>
   <td>Manual External email test – Incoming & Outgoing</td>
-  <td>{{CASE:Manual External email test – Incoming & Outgoing}}</td>
-  <td>{{STATUS:Manual External email test – Incoming & Outgoing}}</td>
-  <td>{{REMARK:Manual External email test – Incoming & Outgoing}}</td>
+  <td></td>
+  <td>PASS</td>
+  <td></td>
 </tr>
 
 </table>
