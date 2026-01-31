@@ -727,16 +727,71 @@ Please find the Daily Monitoring Report<br><br>
 
 <table border="1" cellpadding="6" cellspacing="0" width="60%"
  style="border-collapse:collapse;font-family:Calibri;font-size:13px;">
+
 <tr style="background:#9db7d8;font-weight:bold;">
-<td>Sl. No.</td><td>Item Name</td><td>Status</td><td>Remarks</td>
+  <td>Sl. No.</td>
+  <td>Item Name</td>
+  <td>Case #</td>
+  <td>Status</td>
+  <td>Remarks</td>
 </tr>
-<tr><td>1</td><td>Leads Posting</td><td>PASS</td><td></td></tr>
-<tr><td>2</td><td>Outgoing Queue Processing</td><td>PASS</td><td></td></tr>
-<tr><td>3</td><td>Incoming Queue Processing</td><td>PASS</td><td></td></tr>
-<tr><td>4</td><td>Notifications/Broadcast Successful</td><td>PASS</td><td></td></tr>
-<tr><td>5</td><td>Phone Session Screenpop Successful</td><td>PASS</td><td></td></tr>
-<tr><td>6</td><td>Manual Internal email test – Incoming & Outgoing</td><td>PASS</td><td></td></tr>
-<tr><td>7</td><td>Manual External email test – Incoming & Outgoing</td><td>PASS</td><td></td></tr>
+
+<tr>
+  <td>1</td>
+  <td>Leads Posting</td>
+  <td>{{CASE:Leads Posting}}</td>
+  <td>{{STATUS:Leads Posting}}</td>
+  <td>{{REMARK:Leads Posting}}</td>
+</tr>
+
+<tr>
+  <td>2</td>
+  <td>Outgoing Queue Processing</td>
+  <td>{{CASE:Outgoing Queue Processing}}</td>
+  <td>{{STATUS:Outgoing Queue Processing}}</td>
+  <td>{{REMARK:Outgoing Queue Processing}}</td>
+</tr>
+
+<tr>
+  <td>3</td>
+  <td>Incoming Queue Processing</td>
+  <td>{{CASE:Incoming Queue Processing}}</td>
+  <td>{{STATUS:Incoming Queue Processing}}</td>
+  <td>{{REMARK:Incoming Queue Processing}}</td>
+</tr>
+
+<tr>
+  <td>4</td>
+  <td>Notifications/Broadcast Successful</td>
+  <td>{{CASE:Notifications/Broadcast Successful}}</td>
+  <td>{{STATUS:Notifications/Broadcast Successful}}</td>
+  <td>{{REMARK:Notifications/Broadcast Successful}}</td>
+</tr>
+
+<tr>
+  <td>5</td>
+  <td>Phone Session Screenpop Successful</td>
+  <td>{{CASE:Phone Session Screenpop Successful}}</td>
+  <td>{{STATUS:Phone Session Screenpop Successful}}</td>
+  <td>{{REMARK:Phone Session Screenpop Successful}}</td>
+</tr>
+
+<tr>
+  <td>6</td>
+  <td>Manual Internal email test – Incoming & Outgoing</td>
+  <td>{{CASE:Manual Internal email test – Incoming & Outgoing}}</td>
+  <td>{{STATUS:Manual Internal email test – Incoming & Outgoing}}</td>
+  <td>{{REMARK:Manual Internal email test – Incoming & Outgoing}}</td>
+</tr>
+
+<tr>
+  <td>7</td>
+  <td>Manual External email test – Incoming & Outgoing</td>
+  <td>{{CASE:Manual External email test – Incoming & Outgoing}}</td>
+  <td>{{STATUS:Manual External email test – Incoming & Outgoing}}</td>
+  <td>{{REMARK:Manual External email test – Incoming & Outgoing}}</td>
+</tr>
+
 </table>
 
 <br>
