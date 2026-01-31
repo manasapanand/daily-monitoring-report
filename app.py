@@ -14,11 +14,6 @@ st.title("📊 Daily Monitoring Report Builder")
 def extract_missing_placeholders(html: str):
     return sorted(set(re.findall(r"\{\{REMARK:([^}]+)\}\}", html)))
 
-def extract_all_items_from_layout():
-    return list(dict.fromkeys(
-        re.findall(r"\{\{REMARK:([^}]+)\}\}", EMAIL_LAYOUT)
-    ))
-
 # =====================================================
 # FILE UPLOAD
 # =====================================================
@@ -62,7 +57,22 @@ if st.button("🔄 Generate Auto Values"):
 if "rows" in st.session_state:
     st.header("2️⃣ Edit Case / Status / Remarks")
 
-    for key, row in st.session_state["rows"].items():
+    # 🔑 Extract ALL item names from email_layout (authoritative list)
+    all_items = list(dict.fromkeys(
+        re.findall(r"\{\{REMARK:([^}]+)\}\}", EMAIL_LAYOUT)
+    ))
+
+    for key in all_items:
+        # Ensure row exists (Excel may not have populated it)
+        if key not in st.session_state["rows"]:
+            st.session_state["rows"][key] = {
+                "case_no": "",
+                "status": "PASS",
+                "remarks": ""
+            }
+
+        row = st.session_state["rows"][key]
+
         with st.expander(key, expanded=False):
             row["case_no"] = st.text_input(
                 "Case #",
