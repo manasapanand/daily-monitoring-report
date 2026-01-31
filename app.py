@@ -14,6 +14,46 @@ st.title("📊 Daily Monitoring Report Builder")
 def extract_missing_placeholders(html: str):
     return sorted(set(re.findall(r"\{\{REMARK:([^}]+)\}\}", html)))
 
+def extract_all_item_names_from_layout():
+    """
+    Extract Item Name column values from EMAIL_LAYOUT
+    (3rd <td> in main table, 2nd <td> in Additional Checks)
+    """
+    item_names = []
+
+    # --- Main checklist: 3rd <td> ---
+    main_rows = re.findall(
+        r"<tr>.*?<td>\d+</td>.*?<td>.*?</td>\s*<td>(.*?)</td>",
+        EMAIL_LAYOUT,
+        flags=re.DOTALL
+    )
+
+    # --- Additional checks: 2nd <td> ---
+    additional_rows = re.findall(
+        r"<b>Additional Checks</b>.*?<table.*?>(.*?)</table>",
+        EMAIL_LAYOUT,
+        flags=re.DOTALL
+    )
+
+    if additional_rows:
+        item_names += re.findall(
+            r"<tr>\s*<td>\d+</td>\s*<td>(.*?)</td>",
+            additional_rows[0],
+            flags=re.DOTALL
+        )
+
+    item_names = main_rows + item_names
+
+    # Clean + preserve order
+    cleaned = []
+    for name in item_names:
+        name = re.sub(r"<.*?>", "", name).strip()
+        if name and name not in cleaned:
+            cleaned.append(name)
+
+    return cleaned
+
+
 # =====================================================
 # FILE UPLOAD
 # =====================================================
@@ -57,13 +97,10 @@ if st.button("🔄 Generate Auto Values"):
 if "rows" in st.session_state:
     st.header("2️⃣ Edit Case / Status / Remarks")
 
-    # 🔑 Extract ALL item names from email_layout (authoritative list)
-    all_items = list(dict.fromkeys(
-        re.findall(r"\{\{REMARK:([^}]+)\}\}", EMAIL_LAYOUT)
-    ))
+    all_items = extract_all_item_names_from_layout()
 
     for key in all_items:
-        # Ensure row exists (Excel may not have populated it)
+        # Ensure every checklist item exists
         if key not in st.session_state["rows"]:
             st.session_state["rows"][key] = {
                 "case_no": "",
@@ -92,6 +129,7 @@ if "rows" in st.session_state:
                 value=row["remarks"],
                 key=f"remarks_{key}"
             )
+
 
 def build_html_from_rows(rows):
     html = EMAIL_LAYOUT.replace(
