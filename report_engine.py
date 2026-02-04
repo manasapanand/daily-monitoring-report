@@ -37,18 +37,17 @@ def normalize_desc(text: str) -> str:
     if "archiving of attempt" in low:
         if "archive" in low:
             return "Archiving of Attempt - tlArchive"
-        return "Archiving of Attempt – tlMain"   # ✅ EN DASH (locked behavior)
+        return "Archiving of Attempt – tlMain"   # EN DASH (locked)
 
     if "archiving of lead" in low:
         if "archive" in low:
             return "Archiving of Lead - tlArchive"
-        return "Archiving of Lead - tlMain"      # hyphen (as before)
+        return "Archiving of Lead - tlMain"
 
     if "archiving of interaction" in low:
         if "archive" in low:
             return "Archiving of Interaction - tlArchive"
         return "Archiving of Interaction - tlMain"
-
 
     # ----- Existing -----
     if "interaction created" in low:
@@ -68,12 +67,12 @@ def normalize_desc(text: str) -> str:
 
 def format_datetime(val: str) -> str:
     """
-    Normalize datetime values to email-friendly format
+    Normalize datetime values to DD/MM/YYYY HH:MM AM/PM
     """
     try:
         val = str(val).strip()
         dt = pd.to_datetime(val, dayfirst=True)
-        return dt.strftime("%m/%d/%Y %I:%M %p")
+        return dt.strftime("%d/%m/%Y %I:%M %p")  # ✅ FIXED
     except Exception:
         return str(val)
 
@@ -87,18 +86,6 @@ def generate_remarks(
 ) -> Dict[str, str]:
     """
     Generates remark values from input Excel files.
-
-    Parameters
-    ----------
-    simple_excels : list
-        List of Excel file paths OR file-like objects
-    time_series_excel : optional
-        Excel file path OR file-like object
-
-    Returns
-    -------
-    dict[str, str]
-        Mapping of Item Name → Remark Value
     """
     remarks: Dict[str, str] = {}
 
@@ -147,7 +134,7 @@ def generate_remarks(
             grp = grp.sort_values("Date")
 
             lines = [
-                f"{row['Date'].strftime('%m/%d/%Y')} --- {row['Count']}"
+                f"{row['Date'].strftime('%d/%m/%Y')} --- {row['Count']}"  # ✅ FIXED
                 for _, row in grp.iterrows()
             ]
 
