@@ -22,14 +22,12 @@ def extract_all_item_names_from_layout():
     """
     item_names = []
 
-    # --- Main checklist: 3rd <td> ---
     main_rows = re.findall(
         r"<tr>.*?<td>\d+</td>.*?<td>.*?</td>\s*<td>(.*?)</td>",
         EMAIL_LAYOUT,
         flags=re.DOTALL
     )
 
-    # --- Additional checks table ---
     additional_rows = re.findall(
         r"<b>Additional Checks</b>.*?<table.*?>(.*?)</table>",
         EMAIL_LAYOUT,
@@ -45,7 +43,6 @@ def extract_all_item_names_from_layout():
 
     item_names = main_rows + item_names
 
-    # Clean HTML + preserve order
     cleaned = []
     for name in item_names:
         name = re.sub(r"<.*?>", "", name).strip()
@@ -53,6 +50,32 @@ def extract_all_item_names_from_layout():
             cleaned.append(name)
 
     return cleaned
+
+
+def reformat_time_series_value(label: str, value: str) -> str:
+    """
+    Keep time series AS-IS but normalize format to:
+    Category | DD/MM/YY | Count
+    """
+    lines = value.split("<br>")
+    out = []
+
+    for line in lines:
+        if "---" not in line:
+            out.append(line)
+            continue
+
+        date_part, count_part = [x.strip() for x in line.split("---", 1)]
+
+        try:
+            dt = datetime.strptime(date_part, "%d/%m/%Y")
+            date_part = dt.strftime("%d/%m/%y")
+        except Exception:
+            pass
+
+        out.append(f"{label} | {date_part} | {count_part}")
+
+    return "<br>".join(out)
 
 
 # =====================================================
@@ -80,8 +103,23 @@ if st.button("🔄 Generate Auto Values"):
     else:
         remarks = generate_remarks(simple_files, time_series_file)
 
+        TIME_SERIES_LABEL_MAP = {
+            "Count Of Campaign Email sent": "Campaign Email Sent",
+            "Count Of Campaign SMS sent": "Campaign SMS Sent",
+            "Count of Attempts": "Attempts",
+            "Count of one-to-one SMS sent": "One-to-One SMS Sent",
+            "Count of Interactions": "Interactions",
+            "Count of Leads": "Leads",
+        }
+
         rows = {}
         for key, value in remarks.items():
+            if key in TIME_SERIES_LABEL_MAP:
+                value = reformat_time_series_value(
+                    TIME_SERIES_LABEL_MAP[key],
+                    value
+                )
+
             rows[key] = {
                 "case_no": "",
                 "status": "PASS",
@@ -100,7 +138,6 @@ if "rows" in st.session_state:
     all_items = extract_all_item_names_from_layout()
 
     for key in all_items:
-        # Ensure every checklist item exists
         if key not in st.session_state["rows"]:
             st.session_state["rows"][key] = {
                 "case_no": "",
@@ -109,6 +146,10 @@ if "rows" in st.session_state:
             }
 
         row = st.session_state["rows"][key]
+
+        # 🚫 Skip items explicitly marked as "not executed"
+        if isinstance(row["remarks"], str) and "not executed" in row["remarks"].lower():
+            continue
 
         with st.expander(key, expanded=False):
             row["case_no"] = st.text_input(
@@ -137,7 +178,7 @@ if "rows" in st.session_state:
 def build_html_from_rows(rows):
     html = EMAIL_LAYOUT.replace(
         "{{CHECKLIST_DATE}}",
-        datetime.now().strftime("%d/%m/%Y")  # DD/MM/YYYY
+        datetime.now().strftime("%d/%m/%Y")
     )
 
     for key, row in rows.items():
@@ -168,15 +209,15 @@ if st.button("🧱 Generate HTML"):
 
 
 # =====================================================
-# FIX MISSING PLACEHOLDERS
+# FIX MISSING PLACEHOLDERS (RFI Logs always included)
 # =====================================================
-if (
-    "missing_placeholders" in st.session_state
-    and st.session_state["missing_placeholders"]
-):
+if "rows" in st.session_state:
     st.subheader("⚠️ Missing Fields (Manual Fix)")
 
-    for key in st.session_state["missing_placeholders"]:
+    keys_to_fix = set(st.session_state.get("missing_placeholders", []))
+    keys_to_fix.add("RFI Logs")
+
+    for key in sorted(keys_to_fix):
         if key not in st.session_state["rows"]:
             st.session_state["rows"][key] = {
                 "case_no": "",
