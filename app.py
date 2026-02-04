@@ -14,6 +14,7 @@ st.title("📊 Daily Monitoring Report Builder")
 def extract_missing_placeholders(html: str):
     return sorted(set(re.findall(r"\{\{REMARK:([^}]+)\}\}", html)))
 
+
 def extract_all_item_names_from_layout():
     """
     Extract Item Name column values from EMAIL_LAYOUT
@@ -28,7 +29,7 @@ def extract_all_item_names_from_layout():
         flags=re.DOTALL
     )
 
-    # --- Additional checks: 2nd <td> ---
+    # --- Additional checks table ---
     additional_rows = re.findall(
         r"<b>Additional Checks</b>.*?<table.*?>(.*?)</table>",
         EMAIL_LAYOUT,
@@ -44,7 +45,7 @@ def extract_all_item_names_from_layout():
 
     item_names = main_rows + item_names
 
-    # Clean + preserve order
+    # Clean HTML + preserve order
     cleaned = []
     for name in item_names:
         name = re.sub(r"<.*?>", "", name).strip()
@@ -88,7 +89,6 @@ if st.button("🔄 Generate Auto Values"):
             }
 
         st.session_state["rows"] = rows
-
         st.success("Auto values generated successfully.")
 
 # =====================================================
@@ -131,10 +131,13 @@ if "rows" in st.session_state:
             )
 
 
+# =====================================================
+# HTML BUILDER
+# =====================================================
 def build_html_from_rows(rows):
     html = EMAIL_LAYOUT.replace(
         "{{CHECKLIST_DATE}}",
-        datetime.now().strftime("%m/%d/%Y")
+        datetime.now().strftime("%d/%m/%Y")  # DD/MM/YYYY
     )
 
     for key, row in rows.items():
@@ -144,6 +147,7 @@ def build_html_from_rows(rows):
 
     return html
 
+
 # =====================================================
 # GENERATE HTML
 # =====================================================
@@ -152,11 +156,8 @@ if st.button("🧱 Generate HTML"):
         st.error("Generate values first.")
     else:
         html = build_html_from_rows(st.session_state["rows"])
-
-
         st.session_state["html"] = html
 
-        # Detect missing placeholders
         missing = extract_missing_placeholders(html)
         st.session_state["missing_placeholders"] = missing
 
@@ -189,8 +190,9 @@ if (
             key=f"missing_{key}"
         )
 
+
 # =====================================================
-# RELOAD PREVIEW AFTER MANUAL FIX
+# RELOAD PREVIEW
 # =====================================================
 if "rows" in st.session_state and st.button("🔁 Reload Preview"):
     st.session_state["html"] = build_html_from_rows(st.session_state["rows"])
@@ -202,6 +204,7 @@ if "rows" in st.session_state and st.button("🔁 Reload Preview"):
         st.warning("⚠️ Some placeholders are still missing.")
     else:
         st.success("Preview refreshed with latest updates.")
+
 
 # =====================================================
 # PREVIEW & DOWNLOAD
