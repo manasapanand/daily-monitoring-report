@@ -1,6 +1,5 @@
 import re
 import pandas as pd
-from datetime import datetime
 from typing import List, Dict, Union, IO
 
 
@@ -22,7 +21,7 @@ def normalize_desc(text: str) -> str:
     txt = re.sub(r"^\d+\s*[-.]\s*", "", txt)   # remove numbering
     txt = re.sub(r"\(.*?\)", "", txt)          # remove brackets
     txt = re.sub(r"\s*-\s*$", "", txt)          # remove trailing hyphen
-    txt = re.sub(r"\s+", " ", txt).strip()      # normalize spaces
+    txt = re.sub(r"\s+", " ", txt).strip()     # normalize spaces
 
     low = txt.lower()
 
@@ -62,17 +61,21 @@ def normalize_desc(text: str) -> str:
     if "lead promoted" in low:
         return "Last Lead promoted"
 
+    if "incoming from cns" in low:
+        return "Last Incoming from CNS"
+
     return txt
 
 
 def format_datetime(val: str) -> str:
     """
-    Normalize datetime values to DD/MM/YYYY HH:MM AM/PM
+    GLOBAL DATE STANDARD:
+    MM/DD/YYYY HH:MM AM/PM
     """
     try:
         val = str(val).strip()
-        dt = pd.to_datetime(val, dayfirst=True)
-        return dt.strftime("%d/%m/%Y %I:%M %p")  # ✅ FIXED
+        dt = pd.to_datetime(val, dayfirst=False)
+        return dt.strftime("%m/%d/%Y %I:%M %p")
     except Exception:
         return str(val)
 
@@ -107,10 +110,8 @@ def generate_remarks(
             if pd.isna(raw_val) or str(raw_val).strip() == "":
                 continue
 
-            val = format_datetime(raw_val)
-
             if key:
-                remarks[key] = val
+                remarks[key] = format_datetime(raw_val)
 
     # ---------- TIME SERIES ----------
     if time_series_excel:
@@ -130,14 +131,19 @@ def generate_remarks(
         }
 
         for category, grp in df_ts.groupby("Category"):
-            grp["Date"] = pd.to_datetime(grp["Date"], dayfirst=True)
+            grp["Date"] = pd.to_datetime(grp["Date"], dayfirst=False)
             grp = grp.sort_values("Date")
 
             lines = [
-                f"{row['Date'].strftime('%d/%m/%Y')} --- {row['Count']}"  # ✅ FIXED
+                f"{row['Date'].strftime('%m/%d/%Y')} --- {row['Count']}"
                 for _, row in grp.iterrows()
             ]
 
             remarks[TIME_SERIES_MAP[category]] = "<br>".join(lines)
+
+    # ---------- GUARDED DEFAULTS ----------
+    # If Last SMS Campaign sent is missing, force NULL
+    if "Last SMS Campaign sent" not in remarks:
+        remarks["Last SMS Campaign sent"] = "NULL"
 
     return remarks
