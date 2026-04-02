@@ -67,17 +67,81 @@ def normalize_desc(text: str) -> str:
     return txt
 
 
-def format_datetime(val: str) -> str:
+def _is_numeric_value(val) -> bool:
     """
-    GLOBAL DATE STANDARD:
-    MM/DD/YYYY HH:MM AM/PM
+    True when value is a pure numeric count (not datetime).
+    """
+    if isinstance(val, bool):
+        return False
+    if isinstance(val, (int, float)):
+        return True
+    if isinstance(val, str):
+        txt = val.strip().replace(",", "")
+        if txt == "":
+            return False
+        return bool(re.fullmatch(r"-?\d+(\.\d+)?", txt))
+    return False
+
+
+def _format_numeric(val) -> str:
+    """
+    Keep integer-like values clean (e.g., 5663 not 5663.0).
     """
     try:
-        val = str(val).strip()
-        dt = pd.to_datetime(val, dayfirst=False)
-        return dt.strftime("%m/%d/%Y %I:%M %p")
+        num = float(str(val).strip().replace(",", ""))
+        if num.is_integer():
+            return str(int(num))
+        return str(num)
     except Exception:
-        return str(val)
+        return str(val).strip()
+
+
+def _looks_like_datetime(raw: str) -> bool:
+    """
+    Detect datetime-like strings so we can normalize formatting.
+    """
+    txt = raw.strip()
+    if txt == "":
+        return False
+
+    patterns = [
+        r"^\d{1,2}/\d{1,2}/\d{2,4}(\s+\d{1,2}:\d{2}(:\d{2})?\s*([APMapm]{2})?)?$",
+        r"^\d{4}-\d{2}-\d{2}(\s+\d{1,2}:\d{2}(:\d{2})?)?$",
+    ]
+    return any(re.fullmatch(p, txt) for p in patterns)
+
+
+def format_remark_value(key: str, val) -> str:
+    """
+    Format remarks safely:
+    - Preserve numeric counts as numbers
+    - Parse datetime-like fields using day-first input
+    - Output datetime as MM/DD/YYYY HH:MM AM/PM
+    """
+    if _is_numeric_value(val):
+        return _format_numeric(val)
+
+    raw = str(val).strip()
+    if raw == "":
+        return raw
+
+    # Keep explicit non-values untouched.
+    if raw.upper() == "NULL":
+        return raw
+
+    # Parse date/times for known timestamp fields or datetime-like values.
+    is_datetime_field = key.lower().startswith("last ") or _looks_like_datetime(raw)
+    if is_datetime_field:
+        try:
+            if re.fullmatch(r"^\d{4}-\d{2}-\d{2}(\s+\d{1,2}:\d{2}(:\d{2})?)?$", raw):
+                dt = pd.to_datetime(raw, dayfirst=False)
+            else:
+                dt = pd.to_datetime(raw, dayfirst=True)
+            return dt.strftime("%m/%d/%Y %I:%M %p")
+        except Exception:
+            return raw
+
+    return raw
 
 
 # =====================================================
@@ -111,7 +175,7 @@ def generate_remarks(
                 continue
 
             if key:
-                remarks[key] = format_datetime(raw_val)
+                remarks[key] = format_remark_value(key, raw_val)
 
     # ---------- TIME SERIES ----------
     if time_series_excel:
